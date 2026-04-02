@@ -57,3 +57,14 @@ Before merge:
 - do not persist sensitive values unless the backend contract explicitly requires it
 - prefer short-lived in-memory flow state when possible
 - keep URL tokens only for the flows that explicitly require them
+
+## Offline-only asset loading
+
+The client browser may not have outbound internet access. All assets must be self-contained.
+
+- do not load any script, stylesheet, font, or icon from an external CDN or remote URL
+- do not use Google Fonts, unpkg, cdnjs, jsdelivr, or similar services
+- PrimeIcons and all icon sets must be imported from locally installed npm packages
+- font files must be hosted inside the project (`public/fonts/` or bundled via CSS)
+- after build, verify the output directory has no references to external domains
+- treat any external runtime asset loading as a security and availability risk
