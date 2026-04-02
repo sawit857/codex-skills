@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Vite PrimeReact"
+  short_description: "Best practices for React, Vite, and PrimeReact."
+  default_prompt: "Use $react-vite-primereact-best-practices to set up or review a React + Vite + PrimeReact frontend."
