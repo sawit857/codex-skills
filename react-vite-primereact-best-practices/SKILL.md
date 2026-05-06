@@ -1,24 +1,46 @@
 ---
 name: react-vite-primereact-best-practices
-description: Best practices for building, reviewing, or refactoring React + Vite + PrimeReact frontends. Use when Codex needs to set up a React SPA with Vite, choose or review PrimeReact integration, implement PrimeReact styled mode, define responsive layout strategy without Tailwind, or keep frontend auth/API behavior aligned with backend contracts.
+description: แนวทางปฏิบัติที่แนะนำสำหรับการสร้าง รีวิว หรือรีแฟกเตอร์งาน React + Vite + PrimeReact โดยอ้างอิงโครงสร้างมาตรฐานเดียวกับฝั่ง Next คือ `src/app` + `src/resources/<group>` แต่คงความเบาแบบ Vite SPA เหมาะเมื่อ Codex ต้องตั้งค่า/ตรวจสอบโปรเจกต์ที่ใช้ PrimeReact styled mode, react-hook-form + zod, client-side routing, และ service boundary ที่ชัดเจน.
 ---
 
 # React Vite PrimeReact Best Practices
 
-## Overview
+## ภาพรวม (Overview)
 
-Use this skill when the work involves a React SPA built with Vite and PrimeReact. Default to a production-oriented setup: PrimeReact as the main component layer, styled mode as the visual system, minimal extra dependencies, and frontend behavior that follows backend auth and API contracts instead of inventing its own abstractions.
+ใช้สกิลนี้เมื่อเป็นงาน `React SPA` ที่สร้างด้วย `Vite` และใช้ `PrimeReact` เป็น component layer หลัก โดยให้ยึดแนว production-oriented setup, styled mode เป็น visual system, dependency เท่าที่จำเป็น, และแยกขอบเขต UI, routing, API, และ domain logic ให้ชัดเจนตามมาตรฐานเดียวกับฝั่ง Next
 
-## Workflow
+## ขั้นตอนทำงาน (Workflow)
 
-1. Confirm the frontend foundation.
-2. Lock the PrimeReact stack and theme approach.
-3. Keep UI concerns separate from auth and network concerns.
-4. Review dependencies and security before implementation or merge.
+1. ยืนยันว่าโปรเจกต์เป็น `React + Vite` หรือควรปรับเป็นรูปแบบนี้
+2. เลือกโครงสร้างหลักให้ใช้ `src/app` + `src/resources/<group>` เป็นค่าเริ่มต้น
+3. ล็อก PrimeReact stack, local asset strategy, และ theme mode ก่อนทำ UI
+4. แยก routing, app composition, shared providers, และ domain logic ออกจากกัน
+5. รวมศูนย์ API client, error handling, form patterns, และ service modules
+6. รีวิว dependency, security, และ offline asset loading ก่อน merge
 
-## Frontend foundation
+## กฎโครงสร้าง (Structure Rules)
 
-Default to this stack unless the repository or user explicitly overrides it:
+- ใช้ `src/app` สำหรับ bootstrap, router composition, providers, layouts, และ application shell
+- ใช้ `src/resources/<group>` สำหรับ reusable หรือ domain logic
+- Treat page/screen components as orchestration layers, not the permanent home of API, validation, or message infrastructure
+- Prefer resource-group structure:
+  - `src/app`
+  - `src/resources/<group>/assets`
+  - `src/resources/<group>/contexts`
+  - `src/resources/<group>/components`
+  - `src/resources/<group>/hooks`
+  - `src/resources/<group>/layouts`
+  - `src/resources/<group>/lib`
+  - `src/resources/<group>/models`
+  - `src/resources/<group>/services`
+  - `src/resources/<group>/tests`
+- ถ้าโปรเจกต์เล็กมาก สามารถใช้ top-level shared folders แบบย่อได้ แต่ไม่ควรปล่อยให้ feature โตจนกระจายปนกันใน `components/`, `hooks/`, `services/` แบบไร้ขอบเขต
+
+Read `references/project-structure.md` first when the task involves setting up folders, moving code, or deciding where modules should live.
+
+## กฎ Stack พื้นฐาน (Frontend Foundation)
+
+ค่าเริ่มต้นควรเป็น stack นี้ เว้นแต่รีโปหรือผู้ใช้กำหนดไว้ต่างจากนี้ชัดเจน:
 
 - React SPA
 - TypeScript
@@ -26,43 +48,28 @@ Default to this stack unless the repository or user explicitly overrides it:
 - PrimeReact `10.9.7`
 - PrimeIcons `7.0.0`
 - PrimeReact styled mode
-- PrimeFlex `4.0.0` only if a utility/grid layer is needed
-- No Tailwind CSS when PrimeReact styled mode is the chosen visual system
-
-## Offline-only asset loading
-
-All libraries, fonts, icons, and static assets must be bundled into the production build output. The client browser must never need outbound internet access to load the application.
-
-- Do not load scripts, stylesheets, fonts, or icons from external CDNs at runtime.
-- Do not use Google Fonts, unpkg, cdnjs, jsdelivr, or any remote asset URL in HTML or CSS.
-- PrimeIcons and any icon set must be installed via npm and imported from `node_modules`.
-- Font files must be self-hosted inside the project (e.g. `public/fonts/` or imported via CSS from the bundle).
-- Vite build must produce a fully self-contained output with no external runtime dependencies.
-- If a third-party library attempts to load remote resources at runtime, replace or configure it to use local assets instead.
+- PrimeFlex `4.0.0` only when a utility/grid layer is needed
+- `react-router-dom` เมื่อแอปมีหลาย screen/flow
+- `react-hook-form + zod` สำหรับ production forms
+- หลีกเลี่ยง Tailwind หาก PrimeReact styled mode เป็น visual system หลักของโปรเจกต์
 
 Read `references/stack.md` when you need the package/dependency checklist.
-Read `references/package-template.md` when you need a starting `package.json`.
-Read `references/setup-checklist.md` when you need a step-by-step setup pass.
 
-## PrimeReact integration rules
+## กฎ PrimeReact และฟอร์ม (PrimeReact and Form Rules)
 
 - Use PrimeReact as the main component library.
 - Use styled mode as the default theming path.
 - Avoid mixing PrimeReact styled mode with another full UI system unless the repo already does so.
+- Search PrimeReact first before writing custom UI.
+- Keep PrimeReact provider, theme CSS, PrimeReact base CSS, and PrimeIcons imports in one shared app entrypoint.
 - Treat components with built-in request behavior, such as upload widgets, as presentation helpers first; verify or replace their request logic if the backend contract is strict.
-
-### PrimeReact-first component selection
-
-When implementing any UI element, follow this decision order:
-
-1. **Search PrimeReact first.** Check `references/component-selection.md` for the full component inventory. If PrimeReact has a component that covers the need, use it. Do not write a custom replacement.
-2. **Customize PrimeReact if close but not exact.** If PrimeReact has a component that almost fits, use it and customize via props, `className`, `style`, `pt` (passthrough), or CSS overrides on PrimeReact design tokens. Do not rewrite the component from scratch.
-3. **Write custom only when PrimeReact cannot cover it.** If no PrimeReact component exists for the need, write a custom component. Custom components must follow PrimeReact design tokens for colors, spacing, and typography so the UI stays visually coherent.
-4. **Never duplicate what PrimeReact already provides.** Do not create a custom `<AppButton>`, `<AppDialog>`, `<AppTooltip>`, or similar wrapper that only re-exports a PrimeReact component with no added logic. Import and use PrimeReact directly.
+- Use `react-hook-form + zod` for production forms.
+- Keep manual `useState` per field only for demo code or truly trivial forms.
 
 Read `references/component-selection.md` for the full PrimeReact component inventory organized by category.
+Read `references/shared-patterns.md` for shared UI and form patterns.
 
-## Styling and responsive layout
+## กฎ Layout และ Responsive Design
 
 - Keep responsive behavior required even without Tailwind.
 - Choose one responsive strategy as the primary one:
@@ -71,48 +78,52 @@ Read `references/component-selection.md` for the full PrimeReact component inven
 - Do not combine Tailwind and PrimeReact styled mode by default.
 - Keep the visual system coherent: one theme source, one spacing strategy, one layout utility approach.
 
-## Auth and API boundary
+## กฎขอบเขต Routing และ Composition
 
-- Keep `accessToken`, `url token`, and `signingSessionId` as separate concerns.
-- Send protected API calls with `Authorization: Bearer <access_token>` when that is the backend contract.
-- Use `url token` only to open and resolve screen context such as `ggaureg-ui`, `certreg-ui`, or `signdoc-ui`.
-- Use `signingSessionId` only for `signdoc` session reuse.
-- Do not let a component library redefine auth storage, token flow, API shape, upload format, or error handling rules.
+- Keep routing and app-shell composition under `src/app`.
+- Keep screen components thin: read route params, call services/hooks, and hand prepared data to UI components.
+- Do not let route definitions become the permanent home of API calls or domain transforms.
+- Prefer nested layouts and route wrappers only when they reduce duplication; do not over-abstract a small SPA.
+
+## กฎขอบเขต API และ Service (API and Service Boundary Rules)
+
+- Do not hardcode backend origins in screen files.
+- Keep environment-based configuration in one place.
+- Centralize API clients and request defaults in shared modules.
+- Keep service modules under `src/resources/<group>/services` when they represent domain operations.
+- Keep lower-level wrappers or clients under `src/resources/<group>/lib` when they support multiple services or features.
+- Avoid duplicated inline error extraction and repeated page-local toast/message refs.
+- Keep UI components from becoming the permanent home of network configuration or request orchestration.
+
+## กฎ Authentication และ Security Boundary
+
+- Keep authentication tokens, navigation parameters, and temporary session identifiers as separate concerns.
+- Send protected API calls with `Authorization: Bearer <token>` when that is the backend contract.
+- Do not let PrimeReact or any UI helper redefine auth storage, token flow, API shape, upload format, or error handling rules.
 
 Read `references/security.md` when the task touches auth, upload, token handling, or dependency review.
 
-## Code reuse and centralization
+## กฎ Shared Patterns และ Reuse
 
-Do not repeat the same UI pattern, hook logic, or layout structure across multiple pages. Extract shared concerns into centralized modules.
+- Do not repeat the same UI pattern, hook logic, or layout structure across multiple screens.
+- If the same pattern appears in two or more screens, extract it into shared modules.
+- Shared patterns should live in `src/app` only when app-wide; otherwise place them in `src/resources/<group>/...`.
+- Every serious project should standardize at least: toast/message handling, page loading, API error display, repeated form field layout, and centralized API client.
 
-### When to extract
+Read `references/shared-patterns.md` for code examples and placement rules.
 
-- If the same pattern appears in two or more pages, extract it into `components/common/`, `hooks/`, or `providers/`.
-- If a PrimeReact component always needs the same wrapper setup (e.g., Toast requires a ref and show/hide methods), wrap it in a shared hook or context provider.
-- If multiple forms repeat label + input + validation error layout, extract a shared `<FormField>` wrapper.
+## กฎ Offline Asset Loading
 
-### Required shared patterns
+All libraries, fonts, icons, and static assets must be bundled into the production build output. The client browser must never need outbound internet access to load the application.
 
-Every project should have these centralized patterns instead of duplicating them per page:
+- Do not load scripts, stylesheets, fonts, or icons from external CDNs at runtime.
+- Do not use Google Fonts, unpkg, cdnjs, jsdelivr, or any remote asset URL in HTML or CSS.
+- PrimeIcons and any icon set must be installed via npm and imported from `node_modules`.
+- Font files must be self-hosted inside the project.
+- Vite build must produce a self-contained output with no external runtime dependencies.
+- If a third-party library attempts to load remote resources at runtime, replace or configure it to use local assets instead.
 
-- **Global Toast** — `AppToastProvider` + `useAppToast()` hook. One `<Toast>` in the layout, every page calls `useAppToast().show()`.
-- **Page loading** — `<PageLoading />` component wrapping `ProgressSpinner` with centered layout.
-- **API error display** — `<ApiErrorMessage />` component wrapping `Message` with standard error extraction from Axios errors.
-- **Form field wrapper** — `<FormField>` component that renders label, children (any input), and validation error message in a consistent layout.
-- **Confirm dialog** — `useConfirmDialog()` hook wrapping PrimeReact `ConfirmDialog` with a promise-based API.
-- **API call state** — `useApiCall()` hook that manages `loading`, `error`, `data` state for a single async operation.
-
-### What not to extract
-
-- Do not create thin wrappers that only re-export a PrimeReact component with no added logic.
-- Do not create a generic `<Form>` component that tries to handle every form shape — use `react-hook-form` + `zod` schemas instead.
-- Do not extract page-specific business logic into shared hooks.
-
-Read `references/shared-patterns.md` for full code examples of each pattern.
-
-## Dependency and security review
-
-Before finalizing a React + Vite + PrimeReact setup or change:
+## กฎการดูแลระบบงาน (Operational Rules)
 
 - Pin package versions explicitly.
 - Commit the lock file.
@@ -123,15 +134,18 @@ Before finalizing a React + Vite + PrimeReact setup or change:
 - Verify that UI code does not log or persist sensitive token or secret values.
 - Verify that no `<script src>`, `<link href>`, `@import`, or `url()` references point to external domains in the final build output.
 
-## Review checklist
+## รายการตรวจสอบ (Review Checklist)
 
 Use this checklist when reviewing an existing implementation:
 
 - Is the stack actually React + Vite + PrimeReact, without a conflicting UI system?
+- Is `src/app` used for app-shell, providers, and router composition rather than mixing everything into `main.tsx` or page files?
+- Is `src/resources/<group>` used consistently for shared or domain logic?
 - Is PrimeReact using styled mode consistently?
 - Is responsive layout handled by PrimeFlex or project CSS, but not a second visual system?
+- Are screen files thin enough, or are they becoming the permanent home of API calls and domain transforms?
 - Are protected API calls still aligned with backend contract?
-- Are token roles kept distinct?
+- Are authentication state, route params, and temporary session state kept distinct?
 - Are package versions pinned and lock files committed?
 - Are network-capable components checked against real API requirements?
 - Does the production build load all assets locally without any external CDN or remote URL dependency?
@@ -141,11 +155,25 @@ Use this checklist when reviewing an existing implementation:
 - Is there duplicated UI logic across pages that should be extracted into a shared hook or component?
 - Are forms using `react-hook-form` + `zod` for validation instead of manual state per field?
 
-## References
+## แนวทางจากโครงสร้างอ้างอิง (Repo-Derived Guidance)
 
+แนวทางของสกิลนี้อ้างอิงจาก `react-next-primereact-best-practices` เป็นหลัก โดยปรับให้เหมาะกับ Vite:
+
+- Preserve these strengths:
+  - `src/app` for application composition
+  - `src/resources/<group>` for domain separation
+  - centralized models, services, components, and shared patterns
+  - PrimeReact-first UI decisions
+  - `react-hook-form + zod` for production forms
+- Adapt these differences for Vite:
+  - replace App Router with `react-router-dom` or equivalent client-side routing
+  - move server-first route concerns into app composition, loaders, hooks, or services that fit SPA behavior
+  - keep the structure lightweight; do not import Next-specific files or conventions that Vite does not use
+
+## เอกสารอ้างอิง (References)
+
+- `references/project-structure.md` — primary structure reference and placement rules
 - `references/stack.md` — package set, compatibility notes, and layout choices
-- `references/package-template.md` — starting `package.json` example
-- `references/setup-checklist.md` — setup sequence for React + Vite + PrimeReact
 - `references/component-selection.md` — PrimeReact component inventory and per-screen suggestions
 - `references/shared-patterns.md` — centralized components, hooks, and providers with code examples
 - `references/security.md` — token boundaries, upload/network cautions, and dependency security checks

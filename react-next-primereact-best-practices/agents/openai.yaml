@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Next PrimeReact (Thai Ready)"
+  short_description: "แนวทางมาตรฐาน Next.js App Router + PrimeReact สำหรับใช้งานจริง"
+  default_prompt: "Use $react-next-primereact-best-practices to set up or review a Next.js + PrimeReact project with production-ready team standards."
