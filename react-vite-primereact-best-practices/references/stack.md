@@ -1,68 +1,92 @@
-# React + Vite + PrimeReact stack reference
+# React + Vite + PrimeReact Stack Reference
+
+Use this file when choosing packages, reviewing dependencies, or normalizing a React + Vite + PrimeReact codebase to the team standard.
+
+This reference follows the same design intent as the Next-based skill, but adapts it for a lightweight SPA.
 
 ## Recommended stack
 
-- React
+- React SPA
 - React DOM
 - TypeScript
 - Vite
 - PrimeReact `10.9.7`
 - PrimeIcons `7.0.0`
 - PrimeReact styled mode
+- `react-router-dom` for client-side routing when the app has multiple screens
 - PrimeFlex `4.0.0` only when a utility/grid layer is needed
 
 ## Recommended dependencies
 
-| Package | Version | Purpose |
-|---|---|---|
-| `axios` | `1.9.0` | HTTP client with interceptors for centralized auth/error handling |
-| `react-router-dom` | `7.6.1` | Client-side routing |
-| `react-hook-form` | `7.56.4` | Form state management — replaces manual useState per field |
-| `@hookform/resolvers` | `5.0.1` | Bridge react-hook-form ↔ zod |
-| `zod` | `3.25.36` | Schema validation — type-safe, runtime-safe |
-| `dompurify` | `3.2.6` | HTML sanitization for safe rendering of untrusted content |
+| Package | Purpose |
+| --- | --- |
+| `axios` | HTTP client with centralized defaults and error handling |
+| `react-router-dom` | Client-side routing and route composition |
+| `react-hook-form` | Form state management for production forms |
+| `@hookform/resolvers` | Bridge from RHF to zod |
+| `zod` | Schema validation and typed form parsing |
 
-### Why these packages
+Optional:
 
-- **axios** over native `fetch`: interceptor pattern allows centralized Bearer token attachment and 401 redirect without repeating per call.
-- **react-hook-form + zod** over manual state: eliminates repeated `useState` + `onChange` + validation per field across every form. Zod schemas also validate API response shapes.
-- **react-router-dom**: required for multi-page SPA routing (`ggaureg-ui`, `certreg-ui`, `signdoc-ui`).
-- **dompurify**: required by `SafeHtml` component for sanitizing untrusted HTML.
+- `dompurify` when the UI must render untrusted HTML safely
+- `primeflex` when the project wants PrimeFlex as the layout utility layer
+- test tooling such as `vitest`, `@testing-library/react`, and `jsdom`
 
-### What not to add
+## Why this stack fits the team structure
 
-- Do not add `formik` or `yup` when `react-hook-form` + `zod` is already in the stack.
-- Do not add a second HTTP client (e.g., `ky`, `got`) when `axios` is the standard.
-- Do not add Tailwind CSS when PrimeReact styled mode is the visual system.
+- `Vite` keeps the frontend lightweight and fast for SPA development
+- `src/app` cleanly owns app composition, providers, and routing
+- `src/resources/<group>` keeps domain logic separate from app bootstrap code
+- `PrimeReact` accelerates form-heavy and CRUD-heavy screens
+- `react-hook-form + zod` reduces repeated field-level state and validation code
+- `axios` supports shared clients and request defaults inside `src/resources/<group>/lib`
+- `PrimeIcons` and local theme imports keep the PrimeReact visual layer self-contained
 
-## Compatibility notes
+## Dependency rules
 
-- PrimeReact `10.9.7` depends on React and React DOM as peer dependencies.
-- PrimeReact `10.9.7` also brings `react-transition-group` as a runtime dependency.
-- PrimeIcons is required for many PrimeReact components to render icons correctly.
-- PrimeFlex is optional; if not used, the project must provide responsive layout via custom CSS.
+- Do not add a second HTTP client when `axios` is already the standard.
+- Do not add `formik` or `yup` when `react-hook-form + zod` is already the form standard.
+- Do not mix PrimeReact styled mode with another full visual system unless the repo already committed to that path.
+- Do not normalize unused dependencies into the standard just because one project experimented with them.
+- Do not add Tailwind CSS by default when PrimeReact styled mode is the chosen visual system.
 
-## Theme and styling decisions
+## Theme and styling rules
 
 - Use PrimeReact styled mode as the primary visual system.
-- Do not add Tailwind CSS when the project has already committed to PrimeReact styled mode.
-- Keep theme ownership in one place to avoid specificity and maintenance issues.
+- Import the theme, PrimeReact base CSS, and PrimeIcons in a shared app entry.
+- Use PrimeFlex only if the project explicitly wants it as the main layout utility layer.
+- Otherwise use project-owned CSS and media queries.
+- Do not scatter theme or base CSS imports across multiple screens.
 
-## Offline-only asset loading
+## Environment and network rules
 
-The application must work without outbound internet access from the client browser.
+- Keep backend origins in environment variables or Vite env configuration.
+- Do not hardcode `localhost` origins inside screen files.
+- Centralize shared API configuration in one module.
+- Avoid scattering direct `axios.create()` instances across the app.
 
-- All npm packages are installed locally and bundled by Vite — no CDN script/link tags.
-- PrimeIcons must be imported from the npm package (`import 'primeicons/primeicons.css'`), not from a CDN.
-- If custom fonts are needed, host the font files inside `public/fonts/` or import them from a local package.
-- Do not reference Google Fonts, unpkg, cdnjs, jsdelivr, or any external URL in `index.html`, CSS `@import`, or `url()` values.
-- After `vite build`, verify the `dist/` output contains all required `.css`, `.js`, `.woff2`, and image files with no external fetch at runtime.
+## Routing and service boundary rules
 
-## Suggested setup checkpoints
+- Keep route composition in `src/app`.
+- Keep screen components thin and domain services under `src/resources/<group>/services`.
+- Keep lower-level clients, DTO mappers, and helpers under `src/resources/<group>/lib`.
+- Do not move domain operations into route definitions just because the app is client-rendered.
 
-- Import PrimeReact theme resources correctly.
-- Import PrimeIcons CSS.
-- Initialize app providers needed by PrimeReact.
-- Keep Vite dev proxy pointed at backend `/api` routes.
-- Ensure production build output is bundled into the WAR when the project uses Tomcat packaging.
-- Confirm no `<link>` or `<script>` tags in `index.html` point to external domains.
+## Offline-friendly asset loading
+
+The browser should not need outbound internet access to render the app.
+
+- Import PrimeIcons from npm.
+- Host custom fonts locally if needed.
+- Do not use external CDN script or stylesheet tags.
+- Do not reference remote font providers by default.
+
+## Suggested checkpoints
+
+- Confirm the project is actually using Vite.
+- Confirm PrimeReact versions are compatible.
+- Confirm route composition lives in `src/app`.
+- Confirm `src/resources/<group>` is used for shared and domain logic.
+- Confirm environment variables are used for backend configuration.
+- Confirm repeated API logic is moving into shared modules.
+- Confirm the chosen dependencies fit the repo’s actual usage rather than speculative future use.

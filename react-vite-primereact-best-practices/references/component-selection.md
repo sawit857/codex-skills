@@ -1,12 +1,12 @@
-# PrimeReact component selection
+# PrimeReact Component Selection
 
 Use this file to look up available PrimeReact components before writing custom UI. Always check the inventory below first.
 
-## PrimeReact component inventory
+## PrimeReact Component Inventory
 
 Search this table before implementing any UI element. If a PrimeReact component exists, use it.
 
-### Form inputs
+### Form Inputs
 
 | Component | Use for |
 |---|---|
@@ -35,7 +35,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `Knob` | Circular value input |
 | `KeyFilter` | Input filtering by pattern (used as directive on InputText) |
 
-### Buttons & actions
+### Buttons and Actions
 
 | Component | Use for |
 |---|---|
@@ -43,7 +43,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `SplitButton` | Button with dropdown menu |
 | `SpeedDial` | Floating action button with radial menu |
 
-### Data display
+### Data Display
 
 | Component | Use for |
 |---|---|
@@ -57,7 +57,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `VirtualScroller` | Virtualized large list rendering |
 | `DataScroller` | Lazy-loading scrollable list |
 
-### Overlays & dialogs
+### Overlays and Dialogs
 
 | Component | Use for |
 |---|---|
@@ -68,7 +68,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `OverlayPanel` | Popup panel anchored to an element |
 | `Tooltip` | Hover/focus tooltip |
 
-### Feedback & status
+### Feedback and Status
 
 | Component | Use for |
 |---|---|
@@ -82,7 +82,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `Badge` | Numeric badge on icons/buttons |
 | `Tag` | Labeled status tag |
 
-### Navigation & menu
+### Navigation and Menu
 
 | Component | Use for |
 |---|---|
@@ -99,7 +99,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `Dock` | macOS-style dock menu |
 | `TabView` | Tabbed content panels (also layout) |
 
-### Layout & containers
+### Layout and Containers
 
 | Component | Use for |
 |---|---|
@@ -114,7 +114,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `Toolbar` | Grouped action bar |
 | `ScrollTop` | Scroll-to-top button |
 
-### Media & misc
+### Media and Misc
 
 | Component | Use for |
 |---|---|
@@ -127,7 +127,7 @@ Search this table before implementing any UI element. If a PrimeReact component 
 | `FileUpload` | File upload (verify backend contract before using built-in request behavior) |
 | `Terminal` | Terminal-style text UI |
 
-## Decision rules
+## Decision Rules
 
 1. **Search the inventory above first.** If a component exists for the need, use it directly.
 2. **Customize via props/CSS, not by reimplementing.** Use `className`, `style`, `pt` (passthrough), or design token overrides.
@@ -136,53 +136,49 @@ Search this table before implementing any UI element. If a PrimeReact component 
 
 ---
 
-## Per-screen component suggestions
+## Per-Screen Component Suggestions
 
-## ggaureg-ui
+### Data Entry Screen
 
-Purpose: accept a tokenized entry flow for Google Authenticator registration and guide the user into OTP enrollment.
+Purpose: collect user input, validate it, and submit it through a clear flow.
 
 Recommended component groups:
 
-- `Card` or `Panel` for a compact entry surface
-- `Message` for flow status or validation summary
-- `Button` for primary continue action
-- `ProgressSpinner` for token validation or loading state
-- `Divider` for visual separation when the screen has instructions and actions
+- `Card` or `Panel` for a compact surface
+- `InputText`, `InputNumber`, `Dropdown`, `Calendar`, or `Password` depending on field types
+- `Message`, `InlineMessage`, or `Toast` for validation and status
+- `Button` for primary and secondary actions
+- `Divider` for separating sections when the screen combines instructions and actions
 
-Use plain routing and API code for token validation. Do not let the component layer decide the token lifecycle.
+Keep validation and submission logic in forms, hooks, or services. Do not let the component layer redefine request behavior.
 
-## certreg-ui
+### Multi-Step or Wizard Screen
 
-Purpose: handle certificate registration after the `url token` entry flow is resolved.
+Purpose: guide the user through a sequence of steps with clear progress and checkpoints.
 
 Recommended component groups:
 
 - `Stepper` or `Steps` when the screen is explicitly multi-step
-- `FileUpload` only as a UI helper when backend upload contract is validated explicitly
-- `Password` for `.pfx/.p12` password input
-- `InputText` for plain string fields
-- `Message`, `InlineMessage`, or `Toast` for validation and status
 - `Dialog` only for confirmation or destructive retry flows
+- `Message`, `InlineMessage`, or `Toast` for validation and status
+- `ProgressSpinner` or `Skeleton` for async step transitions
 
-Verify multipart behavior, auth header attachment, and error handling against backend contract before relying on built-in upload behavior.
+Keep progression logic in app or service code rather than scattering it across many UI components.
 
-## signdoc-ui
+### Upload or Processing Screen
 
-Purpose: handle tokenized document signing flows and optional `signingSessionId` reuse.
+Purpose: collect files or processing inputs and show status safely.
 
 Recommended component groups:
 
-- `Stepper` or `Steps` for sign flow progression when the UI is task-driven
-- `FileUpload` or file picker UI only if upload/request behavior is checked against the API contract
-- `Password`, `InputText`, and OTP inputs for sign inputs
-- `DataTable` for document or sign result lists only when needed
-- `Tag`, `Badge`, or `Message` for signing status and certificate state
-- `Toast` for transient success/failure feedback
+- `FileUpload` only as a UI helper when backend upload contract is validated explicitly
+- `InputText` or `Password` for supporting metadata
+- `ProgressBar`, `ProgressSpinner`, `Message`, or `Toast` for status feedback
+- `Tag` or `Badge` for lightweight state display
 
-Keep `signingSessionId` logic in app/service code, not in component abstractions.
+Verify multipart behavior, auth header attachment, and error handling against backend contract before relying on built-in upload behavior.
 
-## General selection rules
+## General Selection Rules
 
 - Prefer PrimeReact components for presentation and interaction consistency.
 - Avoid pulling a second component library into the same screen without strong need.

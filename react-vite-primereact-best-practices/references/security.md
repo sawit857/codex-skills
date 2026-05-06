@@ -1,20 +1,20 @@
-# React + Vite + PrimeReact security reference
+# React + Vite + PrimeReact Security Reference
 
-## Token boundaries
+## Token Boundaries
 
 Keep these roles separate:
 
-- `accessToken`
+- authentication token
   - used for protected API calls
-  - usually sent as `Authorization: Bearer <access_token>` when required by backend contract
-- `url token`
-  - used to open or resolve UI flow context such as `ggaureg-ui`, `certreg-ui`, or `signdoc-ui`
-  - do not treat as a replacement for bearer auth
-- `signingSessionId`
-  - used only by `signdoc` session reuse flows
-  - do not use in `certreg`
+  - usually sent as `Authorization: Bearer <token>` when required by backend contract
+- route parameter or navigation token
+  - used to open or resolve UI flow context
+  - do not treat it as a replacement for bearer auth
+- temporary session identifier
+  - used only for short-lived flow or recovery state when the application explicitly needs it
+  - keep it separate from authentication state
 
-## PrimeReact boundary
+## PrimeReact Boundary
 
 PrimeReact is a presentation and interaction layer. It must not silently redefine:
 
@@ -24,7 +24,7 @@ PrimeReact is a presentation and interaction layer. It must not silently redefin
 - error mapping contract
 - request headers required by the backend
 
-## Network-capable components
+## Network-Capable Components
 
 Treat components with built-in request behavior carefully.
 
@@ -41,7 +41,7 @@ For these components, verify:
 - multipart or JSON payload shape matches backend expectation
 - error responses are mapped without leaking internal details
 
-## Dependency security checks
+## Dependency Security Checks
 
 Before merge:
 
@@ -51,14 +51,14 @@ Before merge:
 - review direct and transitive dependencies, especially `react-transition-group`
 - avoid stacking multiple large UI libraries together without explicit need
 
-## Sensitive data rules
+## Sensitive Data Rules
 
-- do not log token, OTP, password, or secret values in the browser console
+- do not log tokens, passwords, OTPs, or secret values in the browser console
 - do not persist sensitive values unless the backend contract explicitly requires it
 - prefer short-lived in-memory flow state when possible
-- keep URL tokens only for the flows that explicitly require them
+- keep route-bound tokens or session identifiers only for the flows that explicitly require them
 
-## Offline-only asset loading
+## Offline-Only Asset Loading
 
 The client browser may not have outbound internet access. All assets must be self-contained.
 
